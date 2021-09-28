@@ -2,7 +2,10 @@
 #include<vector>
 #include<fstream>
 #include<string>
+#include<algorithm>
 using namespace std;
+
+#define MAX 1000
 
 vector<int> ZFunction(string str){
     int n = str.size();
@@ -22,6 +25,42 @@ vector<int> ZFunction(string str){
     return vect;
 }
 
+int LCS(int mat[MAX][MAX], string s1, string s2){
+    int max;
+    for (int i = 0; i < s1.length(); i++) {
+        if (s1[i] == s2[0]) {
+            mat[i][0] = 1;
+            max = 1;
+        }
+        else {
+            mat[i][0] = 0;
+        }
+    }
+    for (int j = 0; j < s2.length(); j++) {
+        if (s1[0] == s2[j]) {
+            mat[0][j] = 1;
+            max = 1;
+        }
+        else {
+            mat[0][j] = 0;
+        }
+    }
+    for (int i = 1; i < s1.length() - 1; i++) {
+        for (int j = 1; j < s2.length() - 1; j++) {
+            if (s1[i] == s2[j]) {
+                mat[i][j] = mat[i - 1][j - 1] + 1;
+                if (mat[i][j] > max) {
+                    max = mat[i][j];
+                }
+            }
+            else {
+                mat[i][j] = 0;
+            }
+        }
+    }
+    return max;
+}
+
 vector<int> PMP(string texto, string patron, int &cont){
     string general = patron + "$" + texto;
     vector<int> vect = ZFunction(general);
@@ -36,15 +75,19 @@ vector<int> PMP(string texto, string patron, int &cont){
 }
 
 int main(){
-    vector<string> codes;
-    vector<string> transmissions;
-    string tr, code, str, pat;
+    // Definición de variables
+    vector<string> codes; // Codigos en mconde
+    vector<string> transmissions; // Strings de cada archivo transmission
+    string tr, code, str, pat;  //tr => transmision
+                                //code => codigo
     int cont;
     ifstream file1("transmission1.txt");
     ifstream file2("transmission2.txt");
     ifstream file3("transmission3.txt");
     ifstream mcode("mcode.txt");
     ofstream sol("solucion.txt");
+
+    // Lectrua de datos
     while(! mcode.eof()){
         getline(mcode, code);
         codes.push_back(code);
@@ -55,6 +98,8 @@ int main(){
     transmissions.push_back(tr);
     getline(file3, tr);
     transmissions.push_back(tr);
+
+    // Impresion de datos / ya con la busqueda ZFunction
     for(int i = 0; i<codes.size(); i++){
         sol<<"Codigo: "<<codes[i]<<endl;
         vector<int> vect = PMP(transmissions[0], codes[i], cont);
@@ -92,7 +137,13 @@ int main(){
         cont =0;
         sol<<"--------------"<<endl;
     }
+
+    // Comparaciones entre strings
+    // Comparacion t1-t2
+    int mat[MAX][MAX];
+    cout << "hola" << endl;
+    cout << LCS(mat, transmissions[0], transmissions[1]) << endl;
+    cout << "hola" << endl;
     sol<<"=============="<<endl;
-   
     return 0;
 }
