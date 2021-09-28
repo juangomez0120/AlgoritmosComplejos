@@ -5,7 +5,7 @@
 #include<algorithm>
 using namespace std;
 
-#define MAX 1000
+//#define MAX 1000
 
 vector<int> ZFunction(string str){
     int n = str.size();
@@ -25,9 +25,9 @@ vector<int> ZFunction(string str){
     return vect;
 }
 
-int LCS(int mat[MAX][MAX], string s1, string s2){
+int LCS(int mat[1000][1000], string s1, string s2){
     int max;
-    for (int i = 0; i < s1.length(); i++) {
+    for (int i = 0; i < 1000; i++) {
         if (s1[i] == s2[0]) {
             mat[i][0] = 1;
             max = 1;
@@ -36,7 +36,7 @@ int LCS(int mat[MAX][MAX], string s1, string s2){
             mat[i][0] = 0;
         }
     }
-    for (int j = 0; j < s2.length(); j++) {
+    for (int j = 0; j < 1000; j++) {
         if (s1[0] == s2[j]) {
             mat[0][j] = 1;
             max = 1;
@@ -45,8 +45,8 @@ int LCS(int mat[MAX][MAX], string s1, string s2){
             mat[0][j] = 0;
         }
     }
-    for (int i = 1; i < s1.length() - 1; i++) {
-        for (int j = 1; j < s2.length() - 1; j++) {
+    for (int i = 1; i < 1000 - 1; i++) {
+        for (int j = 1; j < 1000 - 1; j++) {
             if (s1[i] == s2[j]) {
                 mat[i][j] = mat[i - 1][j - 1] + 1;
                 if (mat[i][j] > max) {
@@ -140,10 +140,14 @@ int main(){
 
     // Comparaciones entre strings
     // Comparacion t1-t2
-    int mat[MAX][MAX];
-    cout << "hola" << endl;
-    cout << LCS(mat, transmissions[0], transmissions[1]) << endl;
-    cout << "hola" << endl;
+    
+    int mat[1000][1000];
+    sol << "LCS" << endl;
+    if (LCS(mat, transmissions[0], transmissions[1]))
+    sol << "transmission1.txt & transmission2.txt ==> " << LCS(mat, transmissions[0], transmissions[1]) << endl;
+    sol << "transmission1.txt & transmission3.txt ==> " << LCS(mat, transmissions[0], transmissions[2]) << endl;
+    sol << "transmission2.txt & transmission3.txt ==> " << LCS(mat, transmissions[1], transmissions[2]) << endl;
     sol<<"=============="<<endl;
+    
     return 0;
 }
