@@ -117,7 +117,7 @@ string manacher(string texto, int &inicio){
 // Función para encontrar el substring común más largo comparando entre dos textos
 // Complejidad: O(n*m)
 string lcs(int mat[1000][1000], string s1, string s2){
-    int len1 = s1.length() >= 1000 ? 1000 : s1.length(), len2 = s2.length() >= 1000 ? 1000 : s2.length(), maxLen = 0, indiceFinal = -1;
+    int len1 = s1.length(), len2 = s2.length(), maxLen = 0, indiceFinal = -1;
 
     for(int i = 0; i < len1; i++){
         if(s1[i] == s2[0]){
