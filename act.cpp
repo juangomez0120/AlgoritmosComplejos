@@ -19,6 +19,7 @@ using namespace std;
 #define DIVISOR1 "--------------"
 #define DIVISOR2 "========================================="
 
+// Complejidad: O(n+m)
 vector<int> ZFunction(string str){
     int n = str.size();
     vector<int> vect(n, 0);
@@ -37,6 +38,7 @@ vector<int> ZFunction(string str){
     return vect;
 }
 
+// Complejidad: O(n+m)
 vector<int> PMP(string texto, string patron, int &cont){
     string general = patron + "$" + texto;
     vector<int> vect = ZFunction(general);
@@ -108,6 +110,7 @@ string manacher(string texto, int &inicio){
 	return salida;
 }
 
+// Complejidad: O(n*m)
 string lcs(int mat[1000][1000], string s1, string s2){
     int len1 = s1.length() >= 1000 ? 1000 : s1.length(), len2 = s2.length() >= 1000 ? 1000 : s2.length(), maxLen = 0, indiceFinal = -1;
 
@@ -148,6 +151,7 @@ string lcs(int mat[1000][1000], string s1, string s2){
     return maxLen == 0 ? "No hay substrings en común" : s1.substr(indiceFinal - maxLen, maxLen);
 }
 
+// Complejidad: O(n)
 void readData(vector<string> &mcodes, vector<string> &transmissions){
     string str;
     ifstream file1("transmission1.txt");
