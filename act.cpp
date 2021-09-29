@@ -1,11 +1,21 @@
-#include<iostream>
-#include<vector>
-#include<fstream>
-#include<string>
-#include<algorithm>
-using namespace std;
+/*
+ * TC2038: Análisis y diseño de algoritmos avanzados
+ * Actividad Integradora 1
+ * 
+ * Cristóbal Alberto Escamilla Sada - A00827074
+ * Javier Alejandro Banegas Moreno - A00827812
+ * Juan Manuel Gómez Ortiz - A00828010
+ * 
+ * 29 de septiembre del 2021
+ */
 
-//#define MAX 1000
+#include<algorithm>
+#include<fstream>
+#include<iostream>
+#include<string>
+#include<vector>
+
+using namespace std;
 
 vector<int> ZFunction(string str){
     int n = str.size();
@@ -85,7 +95,7 @@ int main(){
     ifstream file2("transmission2.txt");
     ifstream file3("transmission3.txt");
     ifstream mcode("mcode.txt");
-    ofstream sol("solucion.txt");
+    ofstream sol("check.txt");
 
     // Lectrua de datos
     while(! mcode.eof()){
@@ -104,6 +114,7 @@ int main(){
         sol<<"Codigo: "<<codes[i]<<endl;
         vector<int> vect = PMP(transmissions[0], codes[i], cont);
         sol<<"transmission1.txt ==> "<<cont<<" veces"<<endl;
+        
         for(int i =0; i<vect.size(); i++){
             if(i == vect.size()-1){
                 sol<<vect[i]<<endl;
@@ -111,6 +122,7 @@ int main(){
                 sol<<vect[i]<<", ";
             }
         }
+
         vect.clear();
         cont = 0;
         vect = PMP(transmissions[1], codes[i], cont);
@@ -122,6 +134,7 @@ int main(){
                 sol<<vect[i]<<", ";
             }
         }
+
         vect.clear();
         cont =0;
         vect = PMP(transmissions[2], codes[i], cont);

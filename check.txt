@@ -1,0 +1,68 @@
+Codigo: 7BE3A
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+Codigo: 336F9
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+Codigo: ABCA
+transmission1.txt ==> 15 veces
+2157, 2160, 2804, 2807, 5560, 5563, 7468, 7471, 7474, 7477, 7480, 7483, 7486, 7489, 7492
+transmission2.txt ==> 32 veces
+118, 121, 124, 127, 2896, 2899, 2902, 3439, 3442, 4715, 4718, 6519, 6522, 6525, 6528, 6531, 6534, 6537, 6540, 6543, 6546, 6549, 7896, 7899, 7902, 7905, 7908, 8960, 8963, 8966, 8969, 13695
+transmission3.txt ==> 16 veces
+1184, 1187, 1190, 3001, 3004, 6505, 6508, 8308, 8311, 8314, 8317, 8320, 8323, 8326, 8329, 8332
+--------------
+Codigo: AABAA
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+Codigo: 8B702F
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+Codigo: 73A2
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+Codigo: 1C339
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+Codigo: FEDE4
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+Codigo: EEE704
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+Codigo: 323FC
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+Codigo: 70C7AC
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+Codigo: 74911B
+transmission1.txt ==> 0 veces
+transmission2.txt ==> 0 veces
+transmission3.txt ==> 0 veces
+--------------
+LCS
+transmission1.txt & transmission2.txt ==> 5
+transmission1.txt & transmission3.txt ==> 5
+transmission2.txt & transmission3.txt ==> 5
+==============
