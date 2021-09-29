@@ -19,7 +19,7 @@ using namespace std;
 
 #define DIVISOR1 "--------------"
 #define DIVISOR2 "========================================="
-#define MAX 1010
+#define MAX 1000
 
 // Función ZFunction, auxiliar de la función PMP
 // Complejidad: O(n+m)
