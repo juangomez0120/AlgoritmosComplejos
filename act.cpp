@@ -13,7 +13,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
@@ -117,8 +116,9 @@ string manacher(string texto, int &inicio){
 
 // Función para encontrar el substring común más largo comparando entre dos textos
 // Complejidad: O(n*m)
-string lcs(int mat[MAX][MAX], string s1, string s2){
-    int len1 = s1.length(), len2 = s2.length(), maxLen = 0, indiceFinal = -1;
+string lcs(int mat[MAX][MAX], string s1, string s2, int &maxLen){
+    int len1 = s1.length(), len2 = s2.length(), indiceFinal = -1;
+    maxLen = 0;
 
     for(int i = 0; i < len1; i++){
         if(s1[i] == s2[0]){
@@ -154,7 +154,7 @@ string lcs(int mat[MAX][MAX], string s1, string s2){
     }
 
 
-    return maxLen == 0 ? "No hay substrings en común" : s1.substr(indiceFinal - maxLen, maxLen);
+    return maxLen == 0 ? "No hay similitud entre las transmissions" : s1.substr(indiceFinal - maxLen, maxLen);
 }
 
 // Función para leer los archivos de entrada y almacenarlos en vectores
@@ -164,6 +164,7 @@ void readData(vector<string> &mcodes, vector<string> &transmissions){
     ifstream file1("transmission1.txt");
     ifstream file2("transmission2.txt");
     ifstream file3("transmission3.txt");
+
     ifstream mcode("mcode.txt");
     
     while(! mcode.eof()){
@@ -184,27 +185,27 @@ void readData(vector<string> &mcodes, vector<string> &transmissions){
     mcode.close();
 }
 
-pair<int, string> compare(string s1, string s2, string s3){
-  int b = 0;
-  string s;
-  if (s1.length() > b){
-    b = s1.length();
-    s = "transmission1 - transmission2";
-  }
-  if (s2.length() > b){
-    b = s2.length();
-    s = "transmission1 - transmission3";
-  } else if (s2.length() == b){
-    s = "Las longitudes son iguales";
-  }
-  if (s3.length() > b){
-    b = s3.length();
-    s = "transmission2 - transmission3";
-  }
-  pair<int, string> info;
-  info.first = b;
-  info.second = s;
-  return info;
+// Función para determinar las transmissions con mayor similitud
+// Complejidad: O(1)
+string compare(vector<int> lengths){
+    int mayor = 0;
+    string str = "";
+    vector<string> salidas;
+    salidas.push_back("transmission1.txt & transmission2.txt");
+    salidas.push_back("transmission1.txt & transmission3.txt");
+    salidas.push_back("transmission2.txt & transmission3.txt");
+
+    for(int i = 0; i <= 2; i++){
+        if(lengths[i] > mayor)
+            mayor = lengths[i];
+    }
+
+    for(int i = 0; i <= 2; i++){
+        if(lengths[i] == mayor)
+            str += (str == "" ? salidas[i] : ", "+salidas[i]);
+    }
+
+    return (mayor != 0 ? str : "No hay similitud entre las transmissions");
 }
 
 int main(){
@@ -223,7 +224,7 @@ int main(){
         for(int j = 0; j <= 2; j++){
             cont = 0; 
             vect = PMP(transmissions[j], mcodes[i], cont);
-            check << "transmission" << j+1 << ".txt ==> " << cont << " veces" << endl;
+            check << "transmission" << j+1 << ".txt ==> " << cont << (cont != 1 ? " veces" : " vez") << endl;
 
             for(int k = 0; k < vect.size(); k++){
                 if(k == vect.size()-1){
@@ -257,20 +258,29 @@ int main(){
     }
 
     // Impresión de datos: Substrings más largos
-    int mat[MAX][MAX];
-    string lcs1_2 = lcs(mat, transmissions[0], transmissions[1]);
-    string lcs1_3 = lcs(mat, transmissions[0], transmissions[2]);
-    string lcs2_3 = lcs(mat, transmissions[1], transmissions[2]);
-    check << "Substrings en común más largos:" << endl;
-    check << "transmission1.txt & transmission2.txt ==> " << lcs1_2 << endl;
+    int mat[MAX][MAX], lenSubstr = 0;
+    vector<int> similitudes;
+
+    check << "Substrings más largos:" << endl;
+    check << "transmission1.txt & transmission2.txt ==> " << lcs(mat, transmissions[0], transmissions[1], lenSubstr) << endl;
+    check << "Similitud: " << lenSubstr << (lenSubstr != 1 ? " chars" : " char") << endl;
+    similitudes.push_back(lenSubstr);
     check << DIVISOR1 << endl;
-    check << "transmission1.txt & transmission3.txt ==> " << lcs1_3 << endl;
+
+    check << "transmission1.txt & transmission3.txt ==> " << lcs(mat, transmissions[0], transmissions[2], lenSubstr)  << endl;
+    check << "Similitud: " << lenSubstr << (lenSubstr != 1 ? " chars" : " char") << endl;
+    similitudes.push_back(lenSubstr);
     check << DIVISOR1 << endl;
-    check << "transmission2.txt & transmission3.txt ==> " << lcs2_3 << endl;
+
+    check << "transmission2.txt & transmission3.txt ==> " << lcs(mat, transmissions[1], transmissions[2], lenSubstr)  << endl;
+    check << "Similitud: " << lenSubstr << (lenSubstr != 1 ? " chars" : " char") << endl;
+    similitudes.push_back(lenSubstr);
     check << DIVISOR1 << endl;
-    pair<int, string> pairc = compare(lcs1_2, lcs1_3, lcs2_3);
-    check << "La transmisiones más similares son: " << pairc.second << ". La longitud del substring es: " << pairc.first << "." << endl;
+
+    check << "Transmissions con mayor similitud:" << endl;
+    check << compare(similitudes) << endl;
     check << DIVISOR2 << endl;
+    
     check.close();
 
     return 0;
