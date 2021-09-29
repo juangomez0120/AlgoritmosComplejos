@@ -145,7 +145,7 @@ string lcs(int mat[1000][1000], string s1, string s2){
     }
 
 
-    return maxLen == 0 ? "No hay substrings en común." : s1.substr(indiceFinal - maxLen, maxLen);
+    return maxLen == 0 ? "No hay substrings en común" : s1.substr(indiceFinal - maxLen, maxLen);
 }
 
 void readData(vector<string> &mcodes, vector<string> &transmissions){
@@ -216,7 +216,7 @@ int main(){
             check << palindromo << endl;
         }
         else
-            check << "No hay palíndromos." << endl;
+            check << "No hay palíndromos" << endl;
 
         check << (i < 2 ? DIVISOR1 : DIVISOR2) << endl;
     }
