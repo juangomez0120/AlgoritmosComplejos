@@ -208,7 +208,7 @@ int main(){
     int posicion = 0;
     check << "Palíndromo más grande:" << endl;
     for(int i = 0; i <= 2; i++){
-        palindromo = manacher(palindromo, posicion);
+        palindromo = manacher(transmissions[i], posicion);
         check << "transmission" << i+1 << ".txt ==> ";
         
         if(palindromo != ""){
