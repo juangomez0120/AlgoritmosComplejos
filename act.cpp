@@ -19,6 +19,7 @@ using namespace std;
 
 #define DIVISOR1 "--------------"
 #define DIVISOR2 "========================================="
+#define MAX 1010
 
 // Complejidad: O(n+m)
 vector<int> ZFunction(string str){
@@ -112,8 +113,8 @@ string manacher(string texto, int &inicio){
 }
 
 // Complejidad: O(n*m)
-string lcs(int mat[1000][1000], string s1, string s2){
-    int len1 = s1.length() >= 1000 ? 1000 : s1.length(), len2 = s2.length() >= 1000 ? 1000 : s2.length(), maxLen = 0, indiceFinal = -1;
+string lcs(int mat[MAX][MAX], string s1, string s2){
+    int len1 = s1.length(), len2 = s2.length(), maxLen = 0, indiceFinal = -1;
 
     for(int i = 0; i < len1; i++){
         if(s1[i] == s2[0]){
@@ -178,6 +179,29 @@ void readData(vector<string> &mcodes, vector<string> &transmissions){
     mcode.close();
 }
 
+pair<int, string> compare(string s1, string s2, string s3){
+  int b = 0;
+  string s;
+  if (s1.length() > b){
+    b = s1.length();
+    s = "transmission1 - transmission2";
+  }
+  if (s2.length() > b){
+    b = s2.length();
+    s = "transmission1 - transmission3";
+  } else if (s2.length() == b){
+    s = "Las longitudes son iguales";
+  }
+  if (s3.length() > b){
+    b = s3.length();
+    s = "transmission2 - transmission3";
+  }
+  pair<int, string> info;
+  info.first = b;
+  info.second = s;
+  return info;
+}
+
 int main(){
     vector<string> mcodes, transmissions;
     ofstream check("checking.txt");
@@ -227,15 +251,20 @@ int main(){
     }
 
     // Impresión de datos: Substrings más largos
-    int mat[1000][1000];
+    int mat[MAX][MAX];
+    string lcs1_2 = lcs(mat, transmissions[0], transmissions[1]);
+    string lcs1_3 = lcs(mat, transmissions[0], transmissions[2]);
+    string lcs2_3 = lcs(mat, transmissions[1], transmissions[2]);
     check << "Substrings en común más largos:" << endl;
-    check << "transmission1.txt & transmission2.txt ==> " << lcs(mat, transmissions[0], transmissions[1]) << endl;
+    check << "transmission1.txt & transmission2.txt ==> " << lcs1_2 << endl;
     check << DIVISOR1 << endl;
-    check << "transmission1.txt & transmission3.txt ==> " << lcs(mat, transmissions[0], transmissions[2]) << endl;
+    check << "transmission1.txt & transmission3.txt ==> " << lcs1_3 << endl;
     check << DIVISOR1 << endl;
-    check << "transmission2.txt & transmission3.txt ==> " << lcs(mat, transmissions[1], transmissions[2]) << endl;
+    check << "transmission2.txt & transmission3.txt ==> " << lcs2_3 << endl;
+    check << DIVISOR1 << endl;
+    pair<int, string> pairc = compare(lcs1_2, lcs1_3, lcs2_3);
+    check << "La transmisiones más similares son: " << pairc.second << ". La longitud del substring es: " << pairc.first << "." << endl;
     check << DIVISOR2 << endl;
-    
     check.close();
 
     return 0;
