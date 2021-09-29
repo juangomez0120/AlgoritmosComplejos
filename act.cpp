@@ -257,15 +257,10 @@ int main(){
     }
 
     // Impresión de datos: Substrings más largos
-<<<<<<< HEAD
     int mat[MAX][MAX];
     string lcs1_2 = lcs(mat, transmissions[0], transmissions[1]);
     string lcs1_3 = lcs(mat, transmissions[0], transmissions[2]);
     string lcs2_3 = lcs(mat, transmissions[1], transmissions[2]);
-=======
-    int mat[1000][1000];
-
->>>>>>> afc9a523830dd6099050864dbb657c03f33ddd87
     check << "Substrings en común más largos:" << endl;
     check << "transmission1.txt & transmission2.txt ==> " << lcs1_2 << endl;
     check << DIVISOR1 << endl;
