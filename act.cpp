@@ -21,6 +21,7 @@ using namespace std;
 #define DIVISOR2 "========================================="
 #define MAX 1010
 
+// Función ZFunction, auxiliar de la función PMP
 // Complejidad: O(n+m)
 vector<int> ZFunction(string str){
     int n = str.size();
@@ -40,6 +41,7 @@ vector<int> ZFunction(string str){
     return vect;
 }
 
+// Función para determinar la cantidad de veces que se repite un patrón dentro de un texto mediante la Z-Function
 // Complejidad: O(n+m)
 vector<int> PMP(string texto, string patron, int &cont){
     string general = patron + "$" + texto;
@@ -54,6 +56,7 @@ vector<int> PMP(string texto, string patron, int &cont){
     return sal;
 }
 
+// Función que implementa el algoritmo de Manacher para encontrar el palíndromo más grande en un texto
 // Complejidad: O(n)
 string manacher(string texto, int &inicio){
 	string T = "";
@@ -112,6 +115,7 @@ string manacher(string texto, int &inicio){
 	return salida;
 }
 
+// Función para encontrar el substring común más largo comparando entre dos textos
 // Complejidad: O(n*m)
 string lcs(int mat[MAX][MAX], string s1, string s2){
     int len1 = s1.length(), len2 = s2.length(), maxLen = 0, indiceFinal = -1;
@@ -153,6 +157,7 @@ string lcs(int mat[MAX][MAX], string s1, string s2){
     return maxLen == 0 ? "No hay substrings en común" : s1.substr(indiceFinal - maxLen, maxLen);
 }
 
+// Función para leer los archivos de entrada y almacenarlos en vectores
 // Complejidad: O(n)
 void readData(vector<string> &mcodes, vector<string> &transmissions){
     string str;
@@ -235,6 +240,7 @@ int main(){
     // Impresión de datos: Palíndromo más grande
     string palindromo;
     int posicion = 0;
+
     check << "Palíndromo más grande:" << endl;
     for(int i = 0; i <= 2; i++){
         palindromo = manacher(transmissions[i], posicion);
@@ -251,10 +257,15 @@ int main(){
     }
 
     // Impresión de datos: Substrings más largos
+<<<<<<< HEAD
     int mat[MAX][MAX];
     string lcs1_2 = lcs(mat, transmissions[0], transmissions[1]);
     string lcs1_3 = lcs(mat, transmissions[0], transmissions[2]);
     string lcs2_3 = lcs(mat, transmissions[1], transmissions[2]);
+=======
+    int mat[1000][1000];
+
+>>>>>>> afc9a523830dd6099050864dbb657c03f33ddd87
     check << "Substrings en común más largos:" << endl;
     check << "transmission1.txt & transmission2.txt ==> " << lcs1_2 << endl;
     check << DIVISOR1 << endl;
