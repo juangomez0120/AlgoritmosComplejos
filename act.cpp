@@ -9,13 +9,16 @@
  * 29 de septiembre del 2021
  */
 
-#include<algorithm>
-#include<fstream>
-#include<iostream>
-#include<string>
-#include<vector>
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 using namespace std;
+
+#define DIVISOR1 "--------------"
+#define DIVISOR2 "========================================="
 
 vector<int> ZFunction(string str){
     int n = str.size();
@@ -33,6 +36,19 @@ vector<int> ZFunction(string str){
         }
     }
     return vect;
+}
+
+vector<int> PMP(string texto, string patron, int &cont){
+    string general = patron + "$" + texto;
+    vector<int> vect = ZFunction(general);
+    vector<int> sal;
+    for(int i = patron.length()+1; i < general.length(); i++){
+        if(vect[i] == patron.length()){
+            sal.push_back(i-patron.length()-1);
+            cont++;
+        }
+    }
+    return sal;
 }
 
 int LCS(int mat[1000][1000], string s1, string s2){
@@ -71,96 +87,76 @@ int LCS(int mat[1000][1000], string s1, string s2){
     return max;
 }
 
-vector<int> PMP(string texto, string patron, int &cont){
-    string general = patron + "$" + texto;
-    vector<int> vect = ZFunction(general);
-    vector<int> sal;
-    for(int i = patron.length()+1; i < general.length(); i++){
-        if(vect[i] == patron.length()){
-            sal.push_back(i-patron.length()-1);
-            cont++;
-        }
-    }
-    return sal;
-}
-
-int main(){
-    // Definición de variables
-    vector<string> codes; // Codigos en mconde
-    vector<string> transmissions; // Strings de cada archivo transmission
-    string tr, code, str, pat;  //tr => transmision
-                                //code => codigo
-    int cont;
+void readData(vector<string> &mcodes, vector<string> &transmissions){
+    string str;
     ifstream file1("transmission1.txt");
     ifstream file2("transmission2.txt");
     ifstream file3("transmission3.txt");
     ifstream mcode("mcode.txt");
-    ofstream sol("check.txt");
-
-    // Lectrua de datos
+    
     while(! mcode.eof()){
-        getline(mcode, code);
-        codes.push_back(code);
-    }
-    getline(file1, tr);
-    transmissions.push_back(tr);
-    getline(file2, tr);
-    transmissions.push_back(tr);
-    getline(file3, tr);
-    transmissions.push_back(tr);
-
-    // Impresion de datos / ya con la busqueda ZFunction
-    for(int i = 0; i<codes.size(); i++){
-        sol<<"Codigo: "<<codes[i]<<endl;
-        vector<int> vect = PMP(transmissions[0], codes[i], cont);
-        sol<<"transmission1.txt ==> "<<cont<<" veces"<<endl;
-        
-        for(int i =0; i<vect.size(); i++){
-            if(i == vect.size()-1){
-                sol<<vect[i]<<endl;
-            }else{
-                sol<<vect[i]<<", ";
-            }
-        }
-
-        vect.clear();
-        cont = 0;
-        vect = PMP(transmissions[1], codes[i], cont);
-        sol<<"transmission2.txt ==> "<<cont<<" veces"<<endl;
-        for(int i =0; i<vect.size(); i++){
-            if(i == vect.size()-1){
-                sol<<vect[i]<<endl;
-            }else{
-                sol<<vect[i]<<", ";
-            }
-        }
-
-        vect.clear();
-        cont =0;
-        vect = PMP(transmissions[2], codes[i], cont);
-        sol<<"transmission3.txt ==> "<<cont<<" veces"<<endl;
-        for(int i =0; i<vect.size(); i++){
-            if(i == vect.size()-1){
-                sol<<vect[i]<<endl;
-            }else{
-                sol<<vect[i]<<", ";
-            }
-        }
-        vect.clear();
-        cont =0;
-        sol<<"--------------"<<endl;
+        getline(mcode, str);
+        mcodes.push_back(str);
     }
 
-    // Comparaciones entre strings
-    // Comparacion t1-t2
+    getline(file1, str);
+    transmissions.push_back(str);
+    getline(file2, str);
+    transmissions.push_back(str);
+    getline(file3, str);
+    transmissions.push_back(str);
+
+    file1.close();
+    file2.close();
+    file3.close();
+    mcode.close();
+}
+
+int main(){
+    vector<string> mcodes, transmissions;
+    ofstream check("checking.txt");
     
+    readData(mcodes, transmissions);
+
+    // Impresión de datos: Incidencias de código malicioso
+    int cont;
+    vector<int> vect;
+
+    for(int i = 0; i < mcodes.size(); i++){
+        check << "Código: " << mcodes[i] << endl;
+        for(int j = 0; j <= 2; j++){
+            cont = 0; 
+            vect = PMP(transmissions[j], mcodes[i], cont);
+            check << "transmission" << j+1 << ".txt ==> " << cont << " veces" << endl;
+
+            for(int k = 0; k < vect.size(); k++){
+                if(k == vect.size()-1){
+                    check << vect[k] << endl;
+                }else{
+                    check << vect[k] << ", ";
+                }
+            }
+        }
+
+        if(i < mcodes.size()-1)
+            check << DIVISOR1 << endl;
+        else
+            check << DIVISOR2 << endl;
+    }
+
+
+    // Impresión de datos: Substrings más largos
     int mat[1000][1000];
-    sol << "LCS" << endl;
+    check << "Substrings más largos:" << endl;
     if (LCS(mat, transmissions[0], transmissions[1]))
-    sol << "transmission1.txt & transmission2.txt ==> " << LCS(mat, transmissions[0], transmissions[1]) << endl;
-    sol << "transmission1.txt & transmission3.txt ==> " << LCS(mat, transmissions[0], transmissions[2]) << endl;
-    sol << "transmission2.txt & transmission3.txt ==> " << LCS(mat, transmissions[1], transmissions[2]) << endl;
-    sol<<"=============="<<endl;
+    check << "transmission1.txt & transmission2.txt ==> " << LCS(mat, transmissions[0], transmissions[1]) << endl;
+    check << DIVISOR1 << endl;
+    check << "transmission1.txt & transmission3.txt ==> " << LCS(mat, transmissions[0], transmissions[2]) << endl;
+    check << DIVISOR1 << endl;
+    check << "transmission2.txt & transmission3.txt ==> " << LCS(mat, transmissions[1], transmissions[2]) << endl;
+    check << DIVISOR2 << endl;
     
+    check.close();
+
     return 0;
 }
