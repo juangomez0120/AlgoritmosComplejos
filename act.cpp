@@ -13,6 +13,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -27,7 +28,7 @@ vector<int> ZFunction(string str){
     vector<int> vect(n, 0);
     for(int i = 1, l = 0, r = 0; i < n; i++){
         if(i <= r){
-            vect[i] = min(r-1+1, vect[i]);
+            vect[i] = min(r-i+1, vect[i]);
         }
         while(i+vect[i] < n && str[vect[i]] == str[i+vect[i]]){
             vect[i]++;
