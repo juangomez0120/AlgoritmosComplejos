@@ -188,7 +188,6 @@ int main(){
     int n, m, q;
     
     check << DIVISOR << endl;
-
     cin >> n >> m >> q;
     Graph g(n, m);
 
