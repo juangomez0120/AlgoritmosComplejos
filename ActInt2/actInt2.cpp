@@ -9,7 +9,7 @@
  * 21 de noviembre del 2021
  */
 
-// COMPILAR USANDO: "g++ -std=c++14 evidencia2.cpp -o evidencia2"
+// COMPILAR USANDO: "g++ -std=c++14 actInt2.cpp -o actInt2"
 
 #include <cfloat>
 #include <climits>
@@ -21,10 +21,11 @@
 #include <vector>
 
 using namespace std;
-#define MAX 21
+#define MAX 31
 #define INF INT_MAX
 #define DIVISOR "-------------------"
 
+// Estructura para representar un nodo
 struct Node{
     string nombre;
     int x;
@@ -49,10 +50,111 @@ struct Node{
     }
 };
 
-void printMat(int mat[MAX][MAX], int m){
-    for (int i = 0; i < m; i++){
-        for (int j = 0; j < m; j++){
-            cout << (mat[i][j] != INF ? to_string(mat[i][j]) : "INF") << "\t";
+// Estructura para representar un grafo
+struct Graph { 
+    int V, E;
+    int matAdj[MAX][MAX];
+    vector<Node> vectorColonias;
+    vector< pair< int, pair<Node, Node> > > edges; 
+    vector< vector< pair<Node, int> > > adjList;
+    unordered_map<string, Node> hashColonias;
+  
+    Graph(int V, int E){ 
+        this->V = V; 
+        this->E = E;
+        adjList.resize(V);
+        vectorColonias.resize(V);
+
+        for (int i = 0; i<V; i++){
+            for (int j = 0; j<V; j++){
+                if (j == i){
+                    matAdj[i][j] = INF;
+                }
+                else{
+                    matAdj[i][j] = 0;
+                }
+            }
+        }
+    } 
+    
+    void addEdge(Node node1, Node node2, int cost) { 
+        edges.push_back({cost,{node1, node2}});
+        adjList[node1.idx].push_back({node2,cost});
+        matAdj[node1.idx][node2.idx] = matAdj[node2.idx][node1.idx] = cost;
+    } 
+    
+    void load();
+
+    Node getCol(int idx){
+        return vectorColonias[idx];
+    }
+
+    Node getCol(string col){
+        return hashColonias[col];
+    }
+}; 
+  
+// Estructura para representar disjoint sets
+struct DisjointSets 
+{ 
+    int *parent, *rnk; 
+    int n; 
+  
+    DisjointSets(int n){ 
+        this->n = n; 
+        parent = new int[n+1]; 
+        rnk = new int[n+1]; 
+        for (int i = 0; i <= n; i++){ 
+            rnk[i] = 0; 
+            parent[i] = i; 
+        } 
+    } 
+
+    int find(int u) 
+    { 
+        if (u != parent[u]) 
+            parent[u] = find(parent[u]); 
+        return parent[u]; 
+    } 
+  
+    void merge(int x, int y) 
+    { 
+        x = find(x), y = find(y); 
+  
+        if (rnk[x] > rnk[y]) 
+            parent[y] = x; 
+        else
+            parent[x] = y; 
+  
+        if (rnk[x] == rnk[y]) 
+            rnk[y]++; 
+    } 
+};
+
+// Función para crear el grafo
+// Complejidad: O(m)
+void Graph::load(){
+    string col1, col2;
+    Node nodo;
+    int x, y, central, cost;
+
+    for (int i = 0; i < V; i++){
+        cin >> col1 >> x >> y >> central;
+        nodo = Node(col1, x, y, central, i);
+        hashColonias[col1] = nodo;
+        vectorColonias[i] = nodo;
+    }
+
+    for(int i = 0; i < E; i++){
+        cin >> col1 >> col2 >> cost;
+        addEdge(getCol(col1), getCol(col2), cost);
+    }
+}
+
+void printMat(Graph g){
+    for (int i = 0; i < g.V; i++){
+        for (int j = 0; j < g.V; j++){
+            cout << (g.matAdj[i][j] != INF ? to_string(g.matAdj[i][j]) : "INF") << "\t";
         }
         cout << endl;
     }
@@ -60,77 +162,52 @@ void printMat(int mat[MAX][MAX], int m){
 
 // Función para calcular la distancia entre dos puntos cartecianos
 // Complejidad: O(1)
-double calcDistance(Node col1, Node col2){
-    return sqrt((col1.x-col2.x) * (col1.x-col2.x) + (col1.y-col2.y) * (col1.y-col2.y));
+double calcDistance(int x, int y, Node col){
+    return sqrt((x-col.x) * (x-col.x) + (y-col.y) * (y-col.y));
 }
 
 // Función para determinar en dónde se planea conectar nuevas colonias (punto 5)
 // Complejidad: O(nq)
-void connectNewColonies(unordered_map<string, Node> colonias, unordered_map<string, Node> coloniasNuevas, ofstream &check){
-    Node conexion;
+void connectNewColonies(int q, Graph g, ofstream &check){
+    string colonia;
+    int x, y;
     double minDist = DBL_MAX, distance;
+    Node conexion;
+    
     check << "4 - Conexión de nuevas colonias." << endl << endl;
-    for(pair<string, Node> colNueva : coloniasNuevas){
-        for(pair<string, Node> col : colonias){
-            distance = calcDistance(col.second, colNueva.second);
+    for(int i = 1; i <= q; i++){
+        cin >> colonia >> x >> y;
+        for(int j = 0; j < g.vectorColonias.size(); j++){
+            distance = calcDistance(x, y, g.getCol(j));
             if(distance < minDist){
                 minDist = distance;
-                conexion = col.second;
+                conexion = g.getCol(j);
             }
         }
-        check << colNueva.first << " debe conectarse con " << conexion.nombre << endl;
+        check << colonia << " debe conectarse con " << conexion.nombre << endl;
         minDist = DBL_MAX;
     }
+
     check << endl << DIVISOR;
 }
 
 // Función principal encargada de ejecutar el programa
 int main(){
-    // n = cantidad de colonias
-    // m = número de conexiones entre colonias
-    // q = futuras nuevas colonias que se desean conectar
-
-    // Crear un diccionario para las primeras lineas, que son las que leen los nodos. 
-    // El diccionario se usará para obtener los numéros de los nodos ya que se ingresan nombres.
-
     ofstream check("checking2.txt");
-    int n, m, q, x, y, central, costo;
-    string colonia, colonia_a, colonia_b;
-    unordered_map<string, Node> colonias;
-    unordered_map<string, Node> coloniasNuevas;
-    int matAdj[MAX][MAX];
+    int n, m, q;
     
     check << DIVISOR << endl;
+
     cin >> n >> m >> q;
+    Graph g(n, m);
 
-    for (int i = 0; i < n; i++){
-        cin >> colonia >> x >> y >> central;
-        colonias[colonia] = Node(colonia, x, y, central, i);
-    }
-    for (int i = 0; i<m; i++){
-        for (int j = 0; j<m; j++){
-            if (j == i){
-                matAdj[i][j] = INF;
-            }
-            else{
-                matAdj[i][j] = 0;
-            }
-        }
-    }
-    for (int i = 0; i < m; i++){
-        cin >> colonia_a >> colonia_b >> costo;
-        matAdj[colonias[colonia_a].idx][colonias[colonia_b].idx] = matAdj[colonias[colonia_b].idx][colonias[colonia_a].idx] = costo;
-    }
-
-    for(int i = n; i < n+q; i++){
-        cin >> colonia >> x >> y;
-        coloniasNuevas[colonia] = Node(colonia, x, y, 0, i);
-    }
-
-    printMat(matAdj, n);
-    connectNewColonies(colonias, coloniasNuevas, check);
-
+    g.load();
+    connectNewColonies(q, g, check);
     check.close();
+
+    cout << "\nLos datos han sido almacenados en el archivo \'checking2.txt\', dentro del mismo directorio.\n" << endl;
+
+    printMat(g);
     
     return 0;
 }
