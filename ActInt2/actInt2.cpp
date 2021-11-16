@@ -84,6 +84,7 @@ void connectNewColonies(unordered_map<string, Node> colonias, unordered_map<stri
     check << endl << DIVISOR;
 }
 
+// Función principal encargada de ejecutar el programa
 int main(){
     // n = cantidad de colonias
     // m = número de conexiones entre colonias
