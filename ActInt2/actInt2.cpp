@@ -92,6 +92,10 @@ struct Graph {
     Node getCol(string col){
         return hashColonias[col];
     }
+
+    double calcDistance(int, int, Node);
+    void connectNewColonies(int, ofstream&);
+
 }; 
   
 // Estructura para representar disjoint sets
@@ -153,13 +157,13 @@ void Graph::load(){
 
 // Función para calcular la distancia entre dos puntos cartecianos
 // Complejidad: O(1)
-double calcDistance(int x, int y, Node col){
+double Graph::calcDistance(int x, int y, Node col){
     return sqrt((x-col.x) * (x-col.x) + (y-col.y) * (y-col.y));
 }
 
 // Función para determinar en dónde se planea conectar nuevas colonias (punto 5)
 // Complejidad: O(nq)
-void connectNewColonies(int q, Graph g, ofstream &check){
+void Graph::connectNewColonies(int q, ofstream &check){
     string colonia;
     int x, y;
     double minDist = DBL_MAX, distance;
@@ -168,11 +172,11 @@ void connectNewColonies(int q, Graph g, ofstream &check){
     check << "4 - Conexión de nuevas colonias." << endl << endl;
     for(int i = 1; i <= q; i++){
         cin >> colonia >> x >> y;
-        for(int j = 0; j < g.vectorColonias.size(); j++){
-            distance = calcDistance(x, y, g.getCol(j));
+        for(int j = 0; j < vectorColonias.size(); j++){
+            distance = calcDistance(x, y, getCol(j));
             if(distance < minDist){
                 minDist = distance;
-                conexion = g.getCol(j);
+                conexion = getCol(j);
             }
         }
         check << colonia << " debe conectarse con " << conexion.nombre << endl;
@@ -192,7 +196,7 @@ int main(){
     Graph g(n, m);
 
     g.load();
-    connectNewColonies(q, g, check);
+    g.connectNewColonies(q, check);
     check.close();
 
     cout << "\nLos datos han sido almacenados en el archivo \'checking2.txt\', dentro del mismo directorio.\n" << endl;
