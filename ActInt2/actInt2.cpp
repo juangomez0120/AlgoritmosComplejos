@@ -151,15 +151,6 @@ void Graph::load(){
     }
 }
 
-void printMat(Graph g){
-    for (int i = 0; i < g.V; i++){
-        for (int j = 0; j < g.V; j++){
-            cout << (g.matAdj[i][j] != INF ? to_string(g.matAdj[i][j]) : "INF") << "\t";
-        }
-        cout << endl;
-    }
-}
-
 // Función para calcular la distancia entre dos puntos cartecianos
 // Complejidad: O(1)
 double calcDistance(int x, int y, Node col){
@@ -206,8 +197,6 @@ int main(){
     check.close();
 
     cout << "\nLos datos han sido almacenados en el archivo \'checking2.txt\', dentro del mismo directorio.\n" << endl;
-
-    printMat(g);
     
     return 0;
 }
