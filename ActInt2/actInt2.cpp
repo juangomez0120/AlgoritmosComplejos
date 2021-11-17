@@ -27,26 +27,30 @@ using namespace std;
 
 // Estructura para representar un nodo
 struct Node{
-    string nombre;
+    string name;
     int x;
     int y;
     bool central;
     int idx;
 
     Node(){
-        nombre = "";
+        name = "";
         x = 0;
         y = 0;
         central = false;
         idx = 0;
     }
 
-    Node(string nombre, int x, int y, int central, int idx){
-        this->nombre = nombre;
+    Node(string name, int x, int y, int central, int idx){
+        this->name = name;
         this->x = x;
         this->y = y;
         this->central = (central == 1);
         this->idx = idx;
+    }
+
+    bool operator < (const Node &other) const{
+        return this->idx < other.idx;
     }
 
     double calcDistance(int, int);
@@ -91,6 +95,7 @@ struct Graph {
         return hashColonias[col];
     }
 
+    void optimalConnections(ofstream&);
     void connectNewColonies(int, ofstream&);
 }; 
   
@@ -151,13 +156,37 @@ void Graph::load(){
     }
 }
 
+// Función que implementa el algoritmo de Kruskal para encontrar el cableado óptimo de la nueva conexión (punto 1)
+// Complejidad: O(E log E)
+void Graph::optimalConnections(ofstream &check){ 
+    int cost = 0;
+    sort(edges.begin(), edges.end());
+    DisjointSets ds(V);
+
+    check << "1 - Cableado óptimo de la nueva conexión." << endl << endl;
+    for(auto it:edges){
+        int u = it.second.first.idx;
+        int v = it.second.second.idx;
+        int set_u = ds.find(u);
+        int set_v = ds.find(v);
+        if(set_u != set_v){
+            ds.merge(u, v);
+            cost += it.first;
+            check << getCol(u).name << " - " << getCol(v).name << " " << it.first << endl;
+        }
+    }
+    check << endl << "Costo Total: " << cost << endl;
+    check << endl << DIVISOR << endl;
+
+} 
+
 // Función para calcular la distancia entre dos puntos cartecianos
 // Complejidad: O(1)
 double Node::calcDistance(int x, int y){
     return sqrt((this->x-x) * (this->x-x) + (this->y-y) * (this->y-y));
 }
 
-// Función para determinar en dónde se planea conectar nuevas colonias (punto 5)
+// Función para determinar en dónde se planea conectar nuevas colonias (punto 4)
 // Complejidad: O(nq)
 void Graph::connectNewColonies(int q, ofstream &check){
     string colonia;
@@ -175,7 +204,7 @@ void Graph::connectNewColonies(int q, ofstream &check){
                 conexion = getCol(j);
             }
         }
-        check << colonia << " debe conectarse con " << conexion.nombre << endl;
+        check << colonia << " debe conectarse con " << conexion.name << endl;
         minDist = DBL_MAX;
     }
 
@@ -192,6 +221,7 @@ int main(){
     Graph g(n, m);
 
     g.load();
+    g.optimalConnections(check);
     g.connectNewColonies(q, check);
     check.close();
 

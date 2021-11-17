@@ -1,4 +1,14 @@
 -------------------
+1 - Cableado óptimo de la nueva conexión.
+
+Tecnologico - AltaVista 15
+LindaVista - Roma 17
+Roma - AltaVista 18
+Purisima - Tecnologico 40
+
+Costo Total: 90
+
+-------------------
 4 - Conexión de nuevas colonias.
 
 Independencia debe conectarse con Purisima
