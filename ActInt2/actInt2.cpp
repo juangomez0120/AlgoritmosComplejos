@@ -15,13 +15,14 @@
 #include <climits>
 #include <fstream>
 #include <iostream>
+#include <queue>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
 using namespace std;
-#define MAX 31
+#define MAX 30
 #define INF INT_MAX
 #define DIVISOR "-------------------"
 
@@ -56,7 +57,16 @@ struct Node{
     double calcDistance(int, int);
 };
 
-// Estructura para representar un grafo
+// Estructura conteniendo los atributos de un nodo al resolver el problema del viajero
+struct TSPNode{
+    int lev, acumCost, posCost, currVertex;
+    bool visited[MAX];
+    bool operator<(const TSPNode &other) const{
+        return posCost >= other.posCost;
+    }
+};
+
+// Estructura para representar un grafo de nodos
 struct Graph { 
     int V, E;
     int matAdj[MAX][MAX];
@@ -96,6 +106,8 @@ struct Graph {
     }
 
     void optimalConnections(ofstream&);
+    void calcPossibleCost(TSPNode&);
+    void optimalRoute(ofstream&);
     void connectNewColonies(int, ofstream&);
 }; 
   
@@ -180,6 +192,85 @@ void Graph::optimalConnections(ofstream &check){
 
 } 
 
+// Función para calcular el menor costo posible tomando la ruta desde el nodo origen hasta el nodo actual
+// Complejidad: O(n)
+void Graph::calcPossibleCost(TSPNode &currNode){
+    currNode.posCost = currNode.acumCost;
+    int obtCost;
+    for(int i = 0; i < V; i++){
+        obtCost = INF;
+        if(!currNode.visited[i] || i == currNode.currVertex){
+            if(!currNode.visited[i]){
+                for(int j = 0; j < V; j++){
+                    if(i != j && (!currNode.visited[j] || j == 0)){
+                        obtCost = min(obtCost, matAdj[i][j]);
+                    }
+                }
+            }
+            else{
+                for(int j = 0; j < V; j++){
+                    if(!currNode.visited[j]){
+                        obtCost = min(obtCost, matAdj[i][j]);
+                    }
+                }
+            }
+            currNode.posCost += obtCost;
+        }
+    }
+}
+
+// Función que implementa el problema del viajero para encontrar la ruta óptima que pase por todas las colonias no centrales (punto 2)
+// Complejidad: O(2^n)
+void Graph::optimalRoute(ofstream &check){
+    check << "2 - La ruta óptima." << endl << endl;
+
+    int optimalCost = INF, initialIdx = -1, iter = 0;
+    TSPNode root;
+    root.lev = 0;
+    root.acumCost = 0;
+    root.currVertex = 0;
+    for(int i = 0; i < V; i++){
+        root.visited[i] = false;
+    }
+    root.visited[0] = true;
+    calcPossibleCost(root);
+    While(initialIdx == -1){
+        initialIdx = vectorColonias[iter].central ? iter : -1;
+    }
+
+    
+    priority_queue<TSPNode> pq;
+    pq.push(root);
+    while(!pq.empty()){
+        root = pq.top();
+        pq.pop();
+        if(root.posCost < optimalCost){
+            for(int i = 0; i < V; i++){
+                if(!root.visited[i] && matAdj[root.currVertex][i] != INF){
+                    TSPNode connection = root;
+                    connection.lev = root.lev + 1;
+                    connection.acumCost = root.acumCost + matAdj[root.currVertex][i];
+                    connection.currVertex = i;
+                    connection.visited[i] = true;
+
+                    if(connection.lev == V-1){
+                        if(matAdj[connection.currVertex][0] != INF && connection.acumCost + matAdj[connection.currVertex][0] < optimalCost)
+                            optimalCost = connection.acumCost + matAdj[connection.currVertex][0];
+                    }
+                    else{
+                        calcPossibleCost(connection);
+                        if(connection.posCost < optimalCost)
+                            pq.push(connection);
+                    }
+                }
+            }
+        }
+    }
+
+    check << "La Ruta Óptima tiene un costo total de: " << optimalCost << endl;
+    check << endl << DIVISOR << endl;
+}
+
 // Función para calcular la distancia entre dos puntos cartecianos
 // Complejidad: O(1)
 double Node::calcDistance(int x, int y){
@@ -222,6 +313,7 @@ int main(){
 
     g.load();
     g.optimalConnections(check);
+    g.optimalRoute(check);
     g.connectNewColonies(q, check);
     check.close();
 

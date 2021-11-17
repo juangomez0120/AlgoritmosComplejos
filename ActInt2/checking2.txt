@@ -9,6 +9,11 @@ Purisima - Tecnologico 40
 Costo Total: 90
 
 -------------------
+2 - La ruta óptima.
+
+La Ruta Óptima tiene un costo total de: 138
+
+-------------------
 4 - Conexión de nuevas colonias.
 
 Independencia debe conectarse con Purisima
