@@ -48,6 +48,8 @@ struct Node{
         this->central = (central == 1);
         this->idx = idx;
     }
+
+    double calcDistance(int, int);
 };
 
 // Estructura para representar un grafo
@@ -93,7 +95,6 @@ struct Graph {
         return hashColonias[col];
     }
 
-    double calcDistance(int, int, Node);
     void connectNewColonies(int, ofstream&);
 
 }; 
@@ -157,8 +158,8 @@ void Graph::load(){
 
 // Función para calcular la distancia entre dos puntos cartecianos
 // Complejidad: O(1)
-double Graph::calcDistance(int x, int y, Node col){
-    return sqrt((x-col.x) * (x-col.x) + (y-col.y) * (y-col.y));
+double Node::calcDistance(int x, int y){
+    return sqrt((this->x-x) * (this->x-x) + (this->y-y) * (this->y-y));
 }
 
 // Función para determinar en dónde se planea conectar nuevas colonias (punto 5)
@@ -173,7 +174,7 @@ void Graph::connectNewColonies(int q, ofstream &check){
     for(int i = 1; i <= q; i++){
         cin >> colonia >> x >> y;
         for(int j = 0; j < vectorColonias.size(); j++){
-            distance = calcDistance(x, y, getCol(j));
+            distance = getCol(j).calcDistance(x, y);
             if(distance < minDist){
                 minDist = distance;
                 conexion = getCol(j);
@@ -199,7 +200,7 @@ int main(){
     g.connectNewColonies(q, check);
     check.close();
 
-    cout << "\nLos datos han sido almacenados en el archivo \'checking2.txt\', dentro del mismo directorio.\n" << endl;
+    cout << "\nLos resultados han sido almacenados en el archivo \'checking2.txt\', dentro del mismo directorio.\n" << endl;
     
     return 0;
 }
