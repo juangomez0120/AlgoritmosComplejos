@@ -68,13 +68,9 @@ struct Graph {
         vectorColonias.resize(V);
 
         for (int i = 0; i<V; i++){
-            for (int j = 0; j<V; j++){
-                if (j == i){
-                    matAdj[i][j] = INF;
-                }
-                else{
-                    matAdj[i][j] = 0;
-                }
+            matAdj[i][i] = 0;
+            for (int j = i+1; j<V; j++){
+                matAdj[i][j] = matAdj[j][i] = INF;
             }
         }
     } 
@@ -96,7 +92,6 @@ struct Graph {
     }
 
     void connectNewColonies(int, ofstream&);
-
 }; 
   
 // Estructura para representar disjoint sets
