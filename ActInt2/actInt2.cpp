@@ -264,7 +264,6 @@ void Graph::optimalRoute(ofstream &check){
     }
 
     check << "La Ruta Óptima tiene un costo total de: " << optimalCost << endl;
-    check << endl << DIVISOR << endl;
 }
 
 // Función auxiliar a shortestRoute encargada de hacer las consultas y desplegar las rutas entre colonias centrales
