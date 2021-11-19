@@ -224,7 +224,7 @@ void Graph::calcPossibleCost(TSPNode &currNode){
 // Función que implementa el problema del viajero para encontrar la ruta óptima que pase por todas las colonias no centrales (punto 2)
 // Complejidad: O(2^n)
 void Graph::optimalRoute(ofstream &check){
-    int optimalCost = INF, initialIdx = -1, iter = 0;
+    int optimalCost = INF, iter = 0;
     TSPNode root;
     root.lev = 0;
     root.acumCost = 0;
@@ -354,7 +354,7 @@ int main(){
     
     check << endl << DIVISOR << endl;
     check << "2 - La ruta óptima." << endl << endl;
-    //g.optimalRoute(check);
+    g.optimalRoute(check);
     
     check << endl << DIVISOR << endl;
     check << "3 - Caminos más cortos entre centrales." << endl << endl;
