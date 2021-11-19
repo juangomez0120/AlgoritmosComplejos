@@ -346,17 +346,20 @@ int main(){
     
     cin >> n >> m >> q;
     Graph g(n, m);
-
     g.load();
+
     check << DIVISOR << endl;
     check << "1 - Cableado óptimo de la nueva conexión." << endl << endl;
     g.optimalConnections(check);
+    
     check << endl << DIVISOR << endl;
     check << "2 - La ruta óptima." << endl << endl;
     //g.optimalRoute(check);
+    
     check << endl << DIVISOR << endl;
     check << "3 - Caminos más cortos entre centrales." << endl << endl;
     g.shortestRoute(check);
+    
     check << endl << DIVISOR << endl;
     check << "4 - Conexión de nuevas colonias." << endl << endl;
     g.connectNewColonies(q, check);
