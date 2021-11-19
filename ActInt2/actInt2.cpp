@@ -69,7 +69,7 @@ struct TSPNode{
 // Estructura para representar un grafo de nodos
 struct Graph { 
     int V, E;
-    int matAdj[MAX][MAX];
+    int matAdj[MAX][MAX], floydMat[MAX][MAX], floydPath[MAX][MAX];
     vector<Node> vectorColonias;
     vector< pair< int, pair<Node, Node> > > edges; 
     vector< vector< pair<Node, int> > > adjList;
@@ -82,9 +82,10 @@ struct Graph {
         vectorColonias.resize(V);
 
         for (int i = 0; i<V; i++){
-            matAdj[i][i] = 0;
+            matAdj[i][i] = floydMat[i][i] = floydPath[i][i] = 0;
             for (int j = i+1; j<V; j++){
-                matAdj[i][j] = matAdj[j][i] = INF;
+                matAdj[i][j] = matAdj[j][i] = floydMat[i][j] = floydMat[j][i] = INF;
+                floydPath[i][j] = floydPath[j][i] = -1;
             }
         }
     } 
@@ -92,7 +93,7 @@ struct Graph {
     void addEdge(Node node1, Node node2, int cost) { 
         edges.push_back({cost,{node1, node2}});
         adjList[node1.idx].push_back({node2,cost});
-        matAdj[node1.idx][node2.idx] = matAdj[node2.idx][node1.idx] = cost;
+        matAdj[node1.idx][node2.idx] = matAdj[node2.idx][node1.idx] = floydMat[node1.idx][node2.idx] = floydMat[node2.idx][node1.idx] = cost;
     } 
     
     void load();
@@ -108,6 +109,8 @@ struct Graph {
     void optimalConnections(ofstream&);
     void calcPossibleCost(TSPNode&);
     void optimalRoute(ofstream&);
+    void getShortestRoute(int, int, ofstream&);
+    void shortestRoute(ofstream&);
     void connectNewColonies(int, ofstream&);
 }; 
   
@@ -175,7 +178,7 @@ void Graph::optimalConnections(ofstream &check){
     sort(edges.begin(), edges.end());
     DisjointSets ds(V);
 
-    check << "1 - Cableado óptimo de la nueva conexión." << endl << endl;
+    
     for(auto it:edges){
         int u = it.second.first.idx;
         int v = it.second.second.idx;
@@ -188,7 +191,6 @@ void Graph::optimalConnections(ofstream &check){
         }
     }
     check << endl << "Costo Total: " << cost << endl;
-    check << endl << DIVISOR << endl;
 
 } 
 
@@ -222,8 +224,6 @@ void Graph::calcPossibleCost(TSPNode &currNode){
 // Función que implementa el problema del viajero para encontrar la ruta óptima que pase por todas las colonias no centrales (punto 2)
 // Complejidad: O(2^n)
 void Graph::optimalRoute(ofstream &check){
-    check << "2 - La ruta óptima." << endl << endl;
-
     int optimalCost = INF, initialIdx = -1, iter = 0;
     TSPNode root;
     root.lev = 0;
@@ -234,10 +234,6 @@ void Graph::optimalRoute(ofstream &check){
     }
     root.visited[0] = true;
     calcPossibleCost(root);
-    While(initialIdx == -1){
-        initialIdx = vectorColonias[iter].central ? iter : -1;
-    }
-
     
     priority_queue<TSPNode> pq;
     pq.push(root);
@@ -271,6 +267,49 @@ void Graph::optimalRoute(ofstream &check){
     check << endl << DIVISOR << endl;
 }
 
+// Función auxiliar a shortestRoute encargada de hacer las consultas y desplegar las rutas entre colonias centrales
+// Complejidad: O(n)
+void Graph::getShortestRoute(int a, int b, ofstream& check){
+    if(floydPath[a][b] != -1){
+        getShortestRoute(a, floydPath[a][b], check);
+        check << getCol(floydPath[a][b]).name << " - ";
+        getShortestRoute(floydPath[a][b], b, check);
+    }
+}
+
+// Función que implementa el algoritmo de floyd-warshall para encontrar la ruta óptima entre las colonias centrales (punto 3)
+// Complejidad: O(n^3)
+void Graph::shortestRoute(ofstream& check){
+    for(int k = 0; k < V; k++){
+        for(int i = 0; i < V; i ++){
+            for(int j = 0; j < V; j++){
+                if(floydMat[i][k] != INF && floydMat[k][j] != INF && floydMat[i][k]+floydMat[k][j] < floydMat[i][j]){
+                    floydMat[i][j] = floydMat[i][k] + floydMat[k][j];
+                    floydPath[i][j] = k;
+                }
+            }
+        }
+    }
+
+    for(int i = 0; i < V; i++){
+        if(!getCol(i).central)
+            i++;
+        else{
+            for(int j = i+1; j < V; j++){
+                if(getCol(j).central){
+                    if(floydMat[i][j] == INF)
+                        check << "No existe un camino de " << getCol(i).name << " a " << getCol(j).name << endl;
+                    else{
+                        check << getCol(i).name << " - ";
+                        getShortestRoute(i, j, check);
+                        check << getCol(j).name << " (" << floydMat[i][j] << ")" << endl;
+                    }
+                }
+            }
+        }
+    }
+} 
+
 // Función para calcular la distancia entre dos puntos cartecianos
 // Complejidad: O(1)
 double Node::calcDistance(int x, int y){
@@ -285,7 +324,6 @@ void Graph::connectNewColonies(int q, ofstream &check){
     double minDist = DBL_MAX, distance;
     Node conexion;
     
-    check << "4 - Conexión de nuevas colonias." << endl << endl;
     for(int i = 1; i <= q; i++){
         cin >> colonia >> x >> y;
         for(int j = 0; j < vectorColonias.size(); j++){
@@ -298,8 +336,6 @@ void Graph::connectNewColonies(int q, ofstream &check){
         check << colonia << " debe conectarse con " << conexion.name << endl;
         minDist = DBL_MAX;
     }
-
-    check << endl << DIVISOR;
 }
 
 // Función principal encargada de ejecutar el programa
@@ -307,38 +343,27 @@ int main(){
     ofstream check("checking2.txt");
     int n, m, q;
     
-    check << DIVISOR << endl;
+    
     cin >> n >> m >> q;
     Graph g(n, m);
 
     g.load();
+    check << DIVISOR << endl;
+    check << "1 - Cableado óptimo de la nueva conexión." << endl << endl;
     g.optimalConnections(check);
-    g.optimalRoute(check);
+    check << endl << DIVISOR << endl;
+    check << "2 - La ruta óptima." << endl << endl;
+    //g.optimalRoute(check);
+    check << endl << DIVISOR << endl;
+    check << "3 - Caminos más cortos entre centrales." << endl << endl;
+    g.shortestRoute(check);
+    check << endl << DIVISOR << endl;
+    check << "4 - Conexión de nuevas colonias." << endl << endl;
     g.connectNewColonies(q, check);
+    check << endl << DIVISOR << endl;
     check.close();
 
     cout << "\nLos resultados han sido almacenados en el archivo \'checking2.txt\', dentro del mismo directorio.\n" << endl;
     
     return 0;
 }
-
-
-/*
-CASO DE PRUEBA
-5 8 2
-LindaVista 200 120 1
-Purisima 150 75 0
-Tecnologico -50 20 1
-Roma -75 50 0
-AltaVista -50 40 0
-LindaVista Purisima 48
-LindaVista Roma 17
-Purisima Tecnologico 40
-Purisima Roma 50
-Purisima AltaVista 80
-Tecnologico Roma 55
-Tecnologico AltaVista 15
-Roma AltaVista 18
-Independencia 180 -15
-Roble 45 68
-*/
