@@ -29,8 +29,8 @@ using namespace std;
 // Estructura para representar un nodo
 struct Node{
     string name;
-    int x;
-    int y;
+    double x;
+    double y;
     bool central;
     int idx;
 
@@ -42,7 +42,7 @@ struct Node{
         idx = 0;
     }
 
-    Node(string name, int x, int y, int central, int idx){
+    Node(string name, double x, double y, int central, int idx){
         this->name = name;
         this->x = x;
         this->y = y;
@@ -54,12 +54,12 @@ struct Node{
         return this->idx < other.idx;
     }
 
-    double calcDistance(int, int);
+    double calcDistance(double, double);
 };
 
 // Estructura conteniendo los atributos de un nodo al resolver el problema del viajero
 struct TSPNode{
-    int lev, acumCost, posCost, currVertex;
+    int acumCost, posCost, currVertex, visitedNonCentral;
     bool visited[MAX];
     vector<int> route;
     bool operator<(const TSPNode &other) const{
@@ -108,7 +108,7 @@ struct Graph {
     }
 
     void optimalConnections(ofstream&);
-    void calcPossibleCost(TSPNode&);
+    void calcPossibleCost(int, TSPNode&);
     void optimalRoute(ofstream&);
     void getShortestRoute(int, int, ofstream&);
     void shortestRoute(ofstream&);
@@ -157,7 +157,8 @@ struct DisjointSets
 void Graph::load(){
     string col1, col2;
     Node nodo;
-    int x, y, central, cost;
+    double x, y;
+    int central, cost;
 
     for (int i = 0; i < V; i++){
         cin >> col1 >> x >> y >> central;
@@ -197,7 +198,7 @@ void Graph::optimalConnections(ofstream &check){
 
 // Función para calcular el menor costo posible tomando la ruta desde el nodo origen hasta el nodo actual
 // Complejidad: O(n)
-void Graph::calcPossibleCost(TSPNode &currNode){
+void Graph::calcPossibleCost(int startPoint, TSPNode &currNode){
     currNode.posCost = currNode.acumCost;
     int obtCost;
     for(int i = 0; i < V; i++){
@@ -205,7 +206,7 @@ void Graph::calcPossibleCost(TSPNode &currNode){
         if(!currNode.visited[i] || i == currNode.currVertex){
             if(!currNode.visited[i]){
                 for(int j = 0; j < V; j++){
-                    if(i != j && (!currNode.visited[j] || j == 0)){
+                    if(i != j && (!currNode.visited[j] || j == startPoint)){
                         obtCost = min(obtCost, matAdj[i][j]);
                     }
                 }
@@ -225,23 +226,25 @@ void Graph::calcPossibleCost(TSPNode &currNode){
 // Función que implementa el problema del viajero para encontrar la ruta óptima que pase por todas las colonias no centrales (punto 2)
 // Complejidad: O(2^n)
 void Graph::optimalRoute(ofstream &check){
-    int optimalCost = INF, startPoint = -1, iter = 0;
+    int optimalCost = INF, startPoint = -1, numNonCentral = 0;
     vector<int> optimalRt;
     TSPNode root;
-    root.lev = 0;
-    root.acumCost = 0;
-    while (startPoint == -1){
-        if(!getCol(iter).central)
-            startPoint = iter;
-        iter++;
+    for(int i = 0; i < V; i++){
+        if(!getCol(i).central){
+            numNonCentral++;
+            if(startPoint == -1)
+                startPoint = i;
+        }
     }
+    root.acumCost = 0;
     root.currVertex = startPoint;
+    root.visitedNonCentral = 1;
     for(int i = 0; i < V; i++){
         root.visited[i] = false;
     }
     root.visited[startPoint] = true;
     root.route.push_back(root.currVertex);
-    calcPossibleCost(root);
+    calcPossibleCost(startPoint, root);
     
     priority_queue<TSPNode> pq;
     pq.push(root);
@@ -252,19 +255,19 @@ void Graph::optimalRoute(ofstream &check){
             for(int i = 0; i < V; i++){
                 if(!root.visited[i] && matAdj[root.currVertex][i] != INF){
                     TSPNode connection = root;
-                    connection.lev = root.lev + 1;
                     connection.acumCost = root.acumCost + matAdj[root.currVertex][i];
                     connection.currVertex = i;
+                    connection.visitedNonCentral = getCol(connection.currVertex).central ? connection.visitedNonCentral : connection.visitedNonCentral + 1;
                     connection.visited[i] = true;
                     connection.route.push_back(connection.currVertex);
-                    if(connection.lev == V-1){
-                        if(matAdj[connection.currVertex][0] != INF && connection.acumCost + matAdj[connection.currVertex][0] < optimalCost){
-                            optimalCost = connection.acumCost + matAdj[connection.currVertex][0];
+                    if(connection.visitedNonCentral == numNonCentral){
+                        if(matAdj[connection.currVertex][startPoint] != INF && connection.acumCost + matAdj[connection.currVertex][startPoint] < optimalCost){
+                            optimalCost = connection.acumCost + matAdj[connection.currVertex][startPoint];
                             optimalRt = connection.route;
                         }
                     }
                     else{
-                        calcPossibleCost(connection);
+                        calcPossibleCost(startPoint, connection);
                         if(connection.posCost < optimalCost)
                             pq.push(connection);
                     }
@@ -324,7 +327,7 @@ void Graph::shortestRoute(ofstream& check){
 
 // Función para calcular la distancia entre dos puntos cartecianos
 // Complejidad: O(1)
-double Node::calcDistance(int x, int y){
+double Node::calcDistance(double x, double y){
     return sqrt((this->x-x) * (this->x-x) + (this->y-y) * (this->y-y));
 }
 
@@ -332,8 +335,7 @@ double Node::calcDistance(int x, int y){
 // Complejidad: O(nq)
 void Graph::connectNewColonies(int q, ofstream &check){
     string colonia;
-    int x, y;
-    double minDist = DBL_MAX, distance;
+    double x, y, distance, minDist = DBL_MAX;
     Node conexion;
     
     for(int i = 1; i <= q; i++){
