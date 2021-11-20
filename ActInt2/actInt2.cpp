@@ -316,9 +316,7 @@ void Graph::shortestRoute(ofstream& check){
     }
 
     for(int i = 0; i < V; i++){
-        if(!getCol(i).central)
-            i++;
-        else{
+        if(getCol(i).central){
             for(int j = i+1; j < V; j++){
                 if(getCol(j).central){
                     if(floydMat[i][j] == INF)
