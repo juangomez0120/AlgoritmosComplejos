@@ -229,6 +229,7 @@ void Graph::optimalRoute(ofstream &check){
     int optimalCost = INF, startPoint = -1, numNonCentral = 0;
     vector<int> optimalRt;
     TSPNode root;
+    
     for(int i = 0; i < V; i++){
         if(!getCol(i).central){
             numNonCentral++;
@@ -248,9 +249,11 @@ void Graph::optimalRoute(ofstream &check){
     
     priority_queue<TSPNode> pq;
     pq.push(root);
+    
     while(!pq.empty()){
         root = pq.top();
         pq.pop();
+        
         if(root.posCost < optimalCost){
             for(int i = 0; i < V; i++){
                 if(!root.visited[i] && matAdj[root.currVertex][i] != INF){
@@ -260,6 +263,7 @@ void Graph::optimalRoute(ofstream &check){
                     connection.visitedNonCentral = getCol(connection.currVertex).central ? connection.visitedNonCentral : connection.visitedNonCentral + 1;
                     connection.visited[i] = true;
                     connection.route.push_back(connection.currVertex);
+                    
                     if(connection.visitedNonCentral == numNonCentral){
                         if(matAdj[connection.currVertex][startPoint] != INF && connection.acumCost + matAdj[connection.currVertex][startPoint] <= optimalCost){
                             optimalCost = connection.acumCost + matAdj[connection.currVertex][startPoint];
