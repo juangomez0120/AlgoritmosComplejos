@@ -61,6 +61,7 @@ struct Node{
 struct TSPNode{
     int lev, acumCost, posCost, currVertex;
     bool visited[MAX];
+    vector<int> route;
     bool operator<(const TSPNode &other) const{
         return posCost >= other.posCost;
     }
@@ -224,15 +225,22 @@ void Graph::calcPossibleCost(TSPNode &currNode){
 // Función que implementa el problema del viajero para encontrar la ruta óptima que pase por todas las colonias no centrales (punto 2)
 // Complejidad: O(2^n)
 void Graph::optimalRoute(ofstream &check){
-    int optimalCost = INF, iter = 0;
+    int optimalCost = INF, startPoint = -1, iter = 0;
+    vector<int> optimalRt;
     TSPNode root;
     root.lev = 0;
     root.acumCost = 0;
-    root.currVertex = 0;
+    while (startPoint == -1){
+        if(!getCol(iter).central)
+            startPoint = iter;
+        iter++;
+    }
+    root.currVertex = startPoint;
     for(int i = 0; i < V; i++){
         root.visited[i] = false;
     }
-    root.visited[0] = true;
+    root.visited[startPoint] = true;
+    root.route.push_back(root.currVertex);
     calcPossibleCost(root);
     
     priority_queue<TSPNode> pq;
@@ -248,10 +256,12 @@ void Graph::optimalRoute(ofstream &check){
                     connection.acumCost = root.acumCost + matAdj[root.currVertex][i];
                     connection.currVertex = i;
                     connection.visited[i] = true;
-
+                    connection.route.push_back(connection.currVertex);
                     if(connection.lev == V-1){
-                        if(matAdj[connection.currVertex][0] != INF && connection.acumCost + matAdj[connection.currVertex][0] < optimalCost)
+                        if(matAdj[connection.currVertex][0] != INF && connection.acumCost + matAdj[connection.currVertex][0] < optimalCost){
                             optimalCost = connection.acumCost + matAdj[connection.currVertex][0];
+                            optimalRt = connection.route;
+                        }
                     }
                     else{
                         calcPossibleCost(connection);
@@ -263,7 +273,10 @@ void Graph::optimalRoute(ofstream &check){
         }
     }
 
-    check << "La Ruta Óptima tiene un costo total de: " << optimalCost << endl;
+    for(int i = 0; i < optimalRt.size(); i++){
+        check << getCol(optimalRt[i]).name << " - ";
+    }
+    check << getCol(startPoint).name << endl << endl << "La Ruta Óptima tiene un costo total de: " << optimalCost << endl;
 }
 
 // Función auxiliar a shortestRoute encargada de hacer las consultas y desplegar las rutas entre colonias centrales
