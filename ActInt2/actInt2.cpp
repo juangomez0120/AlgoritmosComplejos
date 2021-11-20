@@ -261,8 +261,9 @@ void Graph::optimalRoute(ofstream &check){
                     connection.visited[i] = true;
                     connection.route.push_back(connection.currVertex);
                     if(connection.visitedNonCentral == numNonCentral){
-                        if(matAdj[connection.currVertex][startPoint] != INF && connection.acumCost + matAdj[connection.currVertex][startPoint] < optimalCost){
+                        if(matAdj[connection.currVertex][startPoint] != INF && connection.acumCost + matAdj[connection.currVertex][startPoint] <= optimalCost){
                             optimalCost = connection.acumCost + matAdj[connection.currVertex][startPoint];
+                            connection.route.push_back(startPoint);
                             optimalRt = connection.route;
                         }
                     }
@@ -277,9 +278,9 @@ void Graph::optimalRoute(ofstream &check){
     }
 
     for(int i = 0; i < optimalRt.size(); i++){
-        check << getCol(optimalRt[i]).name << " - ";
+        check << getCol(optimalRt[i]).name << (i < optimalRt.size()-1 ? " - " : "\n\n");
     }
-    check << getCol(startPoint).name << endl << endl << "La Ruta Óptima tiene un costo total de: " << optimalCost << endl;
+    check << "La Ruta Óptima tiene un costo total de: " << optimalCost << endl;
 }
 
 // Función auxiliar a shortestRoute encargada de hacer las consultas y desplegar las rutas entre colonias centrales
