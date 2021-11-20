@@ -359,7 +359,8 @@ void Graph::connectNewColonies(int q, ofstream &check){
 
 // Función principal encargada de ejecutar el programa
 int main(){
-    ofstream check("checking2.txt");
+    string file = "checking2.txt";
+    ofstream check(file);
     int n, m, q;
     
     
@@ -385,7 +386,7 @@ int main(){
     check << endl << DIVISOR << endl;
     check.close();
 
-    cout << "\nLos resultados han sido almacenados en el archivo \'checking2.txt\', dentro del mismo directorio.\n" << endl;
+    cout << "\nLos resultados han sido almacenados en el archivo \'" << file << "\', dentro del mismo directorio.\n" << endl;
     
     return 0;
 }
