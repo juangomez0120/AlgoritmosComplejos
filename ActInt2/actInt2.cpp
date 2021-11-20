@@ -197,7 +197,7 @@ void Graph::optimalConnections(ofstream &check){
 } 
 
 // Función para calcular el menor costo posible tomando la ruta desde el nodo origen hasta el nodo actual
-// Complejidad: O(n)
+// Complejidad: O(n^2)
 void Graph::calcPossibleCost(int startPoint, TSPNode &currNode){
     currNode.posCost = currNode.acumCost;
     int obtCost;
@@ -281,9 +281,9 @@ void Graph::optimalRoute(ofstream &check){
         }
     }
 
-    for(int i = 0; i < optimalRt.size(); i++){
+    for(int i = 0; i < optimalRt.size(); i++)
         check << getCol(optimalRt[i]).name << (i < optimalRt.size()-1 ? " - " : "\n\n");
-    }
+    
     check << "La Ruta Óptima tiene un costo total de: " << optimalCost << endl;
 }
 
