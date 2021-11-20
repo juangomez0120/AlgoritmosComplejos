@@ -91,6 +91,8 @@ struct Graph {
         }
     } 
     
+    // Función para agregar un edge al grafo
+    // Complejidad: O(1)
     void addEdge(Node node1, Node node2, int cost) { 
         edges.push_back({cost,{node1, node2}});
         adjList[node1.idx].push_back({node2,cost});
@@ -98,11 +100,13 @@ struct Graph {
     } 
     
     void load();
-
+    
+    // Función sobrecargada para obtener el nodo de una colonia utilizando su índice como parámetro de entrada
     Node getCol(int idx){
         return vectorColonias[idx];
     }
-
+    
+    // Función sobrecargada para obtener el nodo de una colonia utilizando su nombre como parámetro de entrada
     Node getCol(string col){
         return hashColonias[col];
     }
@@ -174,7 +178,7 @@ void Graph::load(){
 }
 
 // Función que implementa el algoritmo de Kruskal para encontrar el cableado óptimo de la nueva conexión (punto 1)
-// Complejidad: O(E log E)
+// Complejidad: O(mlogm)
 void Graph::optimalConnections(ofstream &check){ 
     int cost = 0;
     sort(edges.begin(), edges.end());
