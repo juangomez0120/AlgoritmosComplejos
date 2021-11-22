@@ -59,7 +59,7 @@ struct Node{
 
 // Estructura conteniendo los atributos de un nodo al resolver el problema del viajero
 struct TSPNode{
-    int acumCost, posCost, currVertex, visitedNonCentral;
+    int acumCost, posCost, prevVertex, currVertex, visitedNonCentral;
     bool visited[MAX];
     vector<int> route;
     bool operator<(const TSPNode &other) const{
@@ -70,7 +70,7 @@ struct TSPNode{
 // Estructura para representar un grafo de nodos
 struct Graph { 
     int V, E;
-    int matAdj[MAX][MAX], floydMat[MAX][MAX], floydPath[MAX][MAX];
+    int matAdj[MAX][MAX], floydPath[MAX][MAX];
     vector<Node> vectorColonias;
     vector< pair< int, pair<Node, Node> > > edges; 
     vector< vector< pair<Node, int> > > adjList;
@@ -83,9 +83,9 @@ struct Graph {
         vectorColonias.resize(V);
 
         for (int i = 0; i<V; i++){
-            matAdj[i][i] = floydMat[i][i] = floydPath[i][i] = 0;
+            matAdj[i][i] = floydPath[i][i] = 0;
             for (int j = i+1; j<V; j++){
-                matAdj[i][j] = matAdj[j][i] = floydMat[i][j] = floydMat[j][i] = INF;
+                matAdj[i][j] = matAdj[j][i] = INF;
                 floydPath[i][j] = floydPath[j][i] = -1;
             }
         }
@@ -96,7 +96,7 @@ struct Graph {
     void addEdge(Node node1, Node node2, int cost) { 
         edges.push_back({cost,{node1, node2}});
         adjList[node1.idx].push_back({node2,cost});
-        matAdj[node1.idx][node2.idx] = matAdj[node2.idx][node1.idx] = floydMat[node1.idx][node2.idx] = floydMat[node2.idx][node1.idx] = cost;
+        matAdj[node1.idx][node2.idx] = matAdj[node2.idx][node1.idx] = cost;
     } 
     
     void load();
@@ -112,10 +112,12 @@ struct Graph {
     }
 
     void optimalConnections(ofstream&);
+    void calcShortestRoutes(ofstream&);
+    void checkShortestRoute(int, int, ofstream&);
     void calcPossibleCost(int, TSPNode&);
+    void updateVisited(int, int, TSPNode&);
     void optimalRoute(ofstream&);
-    void getShortestRoute(int, int, ofstream&);
-    void shortestRoute(ofstream&);
+    void getShortestCentralRoutes(ofstream&);
     void connectNewColonies(int, ofstream&);
 }; 
   
@@ -198,7 +200,32 @@ void Graph::optimalConnections(ofstream &check){
     }
     check << endl << "Costo Total: " << cost << endl;
 
-} 
+}
+
+// Función que implementa el algoritmo de floyd-warshall para encontrar la ruta óptima entre todas las colonias y agregar sus costos a la matriz de adyacencias
+// Complejidad: O(n^3)
+void Graph::calcShortestRoutes(ofstream& check){
+    for(int k = 0; k < V; k++){
+        for(int i = 0; i < V; i ++){
+            for(int j = 0; j < V; j++){
+                if(matAdj[i][k] != INF && matAdj[k][j] != INF && matAdj[i][k]+matAdj[k][j] < matAdj[i][j]){
+                    matAdj[i][j] = matAdj[i][k] + matAdj[k][j];
+                    floydPath[i][j] = k;
+                }
+            }
+        }
+    }
+}
+
+// Función para encontrar la ruta mas corta entre dos colonias
+// Complejidad: O(n)
+void Graph::checkShortestRoute(int a, int b, ofstream& check){
+    if(floydPath[a][b] != -1){
+        checkShortestRoute(a, floydPath[a][b], check);
+        check << getCol(floydPath[a][b]).name << " - ";
+        checkShortestRoute(floydPath[a][b], b, check);
+    }
+}
 
 // Función para calcular el menor costo posible tomando la ruta desde el nodo origen hasta el nodo actual
 // Complejidad: O(n^2)
@@ -227,6 +254,16 @@ void Graph::calcPossibleCost(int startPoint, TSPNode &currNode){
     }
 }
 
+// Actualiza las colonias visitadas del nodo actual
+// Complejidad: O(n)
+void Graph::updateVisited(int a, int b, TSPNode &currNode){
+    if(floydPath[a][b] != -1){
+        updateVisited(a, floydPath[a][b], currNode);
+        currNode.visited[getCol(floydPath[a][b]).idx] = true;
+        updateVisited(floydPath[a][b], b, currNode);
+    }
+}
+
 // Función que implementa el problema del viajero para encontrar la ruta óptima que pase por todas las colonias no centrales (punto 2)
 // Complejidad: O(2^n)
 void Graph::optimalRoute(ofstream &check){
@@ -242,6 +279,7 @@ void Graph::optimalRoute(ofstream &check){
         }
     }
     root.acumCost = 0;
+    root.prevVertex = -1;
     root.currVertex = startPoint;
     root.visitedNonCentral = 1;
     for(int i = 0; i < V; i++){
@@ -263,9 +301,11 @@ void Graph::optimalRoute(ofstream &check){
                 if(!root.visited[i] && matAdj[root.currVertex][i] != INF){
                     TSPNode connection = root;
                     connection.acumCost = root.acumCost + matAdj[root.currVertex][i];
+                    connection.prevVertex = root.currVertex;
                     connection.currVertex = i;
                     connection.visitedNonCentral = getCol(connection.currVertex).central ? connection.visitedNonCentral : connection.visitedNonCentral + 1;
                     connection.visited[i] = true;
+                    updateVisited(connection.prevVertex, connection.currVertex, connection);
                     connection.route.push_back(connection.currVertex);
                     
                     if(connection.visitedNonCentral == numNonCentral){
@@ -285,52 +325,32 @@ void Graph::optimalRoute(ofstream &check){
         }
     }
 
-    for(int i = 0; i < optimalRt.size(); i++)
-        check << getCol(optimalRt[i]).name << (i < optimalRt.size()-1 ? " - " : "\n\n");
-    
-    check << "La Ruta Óptima tiene un costo total de: " << optimalCost << endl;
+    for(int i = optimalRt.size()-1; i >= 1; i--){
+        check << getCol(optimalRt[i]).name << " - ";
+        checkShortestRoute(optimalRt[i],optimalRt[i-1], check);
+    }
+    check << getCol(optimalRt[0]).name << endl << endl << "La Ruta Óptima tiene un costo total de: " << optimalCost << endl;
 }
 
-// Función auxiliar a shortestRoute encargada de hacer las consultas y desplegar las rutas entre colonias centrales
-// Complejidad: O(n)
-void Graph::getShortestRoute(int a, int b, ofstream& check){
-    if(floydPath[a][b] != -1){
-        getShortestRoute(a, floydPath[a][b], check);
-        check << getCol(floydPath[a][b]).name << " - ";
-        getShortestRoute(floydPath[a][b], b, check);
-    }
-}
-
-// Función que implementa el algoritmo de floyd-warshall para encontrar la ruta óptima entre las colonias centrales (punto 3)
-// Complejidad: O(n^3)
-void Graph::shortestRoute(ofstream& check){
-    for(int k = 0; k < V; k++){
-        for(int i = 0; i < V; i ++){
-            for(int j = 0; j < V; j++){
-                if(floydMat[i][k] != INF && floydMat[k][j] != INF && floydMat[i][k]+floydMat[k][j] < floydMat[i][j]){
-                    floydMat[i][j] = floydMat[i][k] + floydMat[k][j];
-                    floydPath[i][j] = k;
-                }
-            }
-        }
-    }
-
+// Función para encontrar las rutas mas cortas entre las colonias centrales (punto 3)
+// Complejidad: O(n^2)
+void Graph::getShortestCentralRoutes(ofstream& check){
     for(int i = 0; i < V; i++){
         if(getCol(i).central){
             for(int j = i+1; j < V; j++){
                 if(getCol(j).central){
-                    if(floydMat[i][j] == INF)
+                    if(matAdj[i][j] == INF)
                         check << "No existe un camino de " << getCol(i).name << " a " << getCol(j).name << endl;
                     else{
                         check << getCol(i).name << " - ";
-                        getShortestRoute(i, j, check);
-                        check << getCol(j).name << " (" << floydMat[i][j] << ")" << endl;
+                        checkShortestRoute(i, j, check);
+                        check << getCol(j).name << " (" << matAdj[i][j] << ")" << endl;
                     }
                 }
             }
         }
     }
-} 
+}
 
 // Función para calcular la distancia entre dos puntos cartecianos
 // Complejidad: O(1)
@@ -375,12 +395,13 @@ int main(){
     g.optimalConnections(check);
     
     check << endl << DIVISOR << endl;
+    g.calcShortestRoutes(check);
     check << "2 - La ruta óptima." << endl << endl;
     g.optimalRoute(check);
     
     check << endl << DIVISOR << endl;
     check << "3 - Caminos más cortos entre centrales." << endl << endl;
-    g.shortestRoute(check);
+    g.getShortestCentralRoutes(check);
     
     check << endl << DIVISOR << endl;
     check << "4 - Conexión de nuevas colonias." << endl << endl;
